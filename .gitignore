@@ -1,0 +1,42 @@
+# Virtualenv
+venv/
+.env
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# IDE / OS-specific
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs and history
+logs/
+history/
+*.log
+
+# Dagster runtime & cache
+dagster_home/
+telemetry/
+.nux/
+.etl_pipeline/
+storage/
+schedules/
+dagster.yaml
+
+# Pytest / Mypy / coverage
+.mypy_cache/
+.pytest_cache/
+coverage.xml
+htmlcov/
+.cache/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.db
+*.sqlite
