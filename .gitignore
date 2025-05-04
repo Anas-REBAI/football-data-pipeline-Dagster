@@ -20,7 +20,7 @@ history/
 
 # Dagster runtime & cache
 dagster_home/
-telemetry/
+.telemetry/
 .nux/
 .etl_pipeline/
 storage/

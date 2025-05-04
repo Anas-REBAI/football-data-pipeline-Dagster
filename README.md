@@ -22,9 +22,9 @@ This project builds a modular, containerized data pipeline for football data ana
 | -------------- | -------------------------------- |
 | Orchestration  | Dagster 🌀                       |
 | Object Storage | MinIO 📦                         |
-| Data Warehouse | ClickHouse ⚡                     |
-| Transformation | DBT 🧮 *(to-do)*                 |
-| Visualization  | Metabase / Superset 📊 *(to-do)* |
+| Data Warehouse | ClickHouse ⚡                    |
+| Transformation | DBT 🧮                           |
+| Visualization  | Metabase / Superset 📊           |
 | Infrastructure | Docker Compose 🐳                |
 
 ---

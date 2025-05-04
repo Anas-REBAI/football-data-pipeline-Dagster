@@ -42,8 +42,15 @@ services:
       - clickhouse_data:/var/lib/clickhouse
     environment:
       CLICKHOUSE_DB: football_statsbomb
-      CLICKHOUSE_USER: analyst
-      CLICKHOUSE_PASSWORD: analyst
+      CLICKHOUSE_USER: admin
+      CLICKHOUSE_PASSWORD: admin
+    command: 
+      - /bin/sh
+      - -c
+      - |
+        # Script d'initialisation
+        echo "CREATE DATABASE IF NOT EXISTS football_statsbomb;" > /docker-entrypoint-initdb.d/init.sql
+        /entrypoint.sh
     networks:
       - dagnet
 

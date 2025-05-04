@@ -1,6 +1,7 @@
 from dagster import Definitions, load_assets_from_modules
 from etl_pipeline import assets
-from etl_pipeline.config.minio_resource import minio_resource, clickhouse_resource
+from etl_pipeline.config.ressources.minio_resource import minio_resource
+from etl_pipeline.config.ressources.clickhouse_resource import clickhouse_resource
 from etl_pipeline.config.settings import (
     MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET,
     CLICKHOUSE_HOST, CLICKHOUSE_PORT, CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB,
