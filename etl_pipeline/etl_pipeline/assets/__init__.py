@@ -2,3 +2,4 @@ from .loadDataToMinio import transfer_statsbomb_to_minio
 from .load_events_to_clickhouse import load_events_to_clickhouse
 from .load_lineups_to_clickhouse import load_lineups_to_clickhouse
 from .load_three_sixty_to_clickhouse import load_three_sixty_to_clickhouse
+from .load_competitions_to_clickhouse import load_competitions_to_clickhouse
