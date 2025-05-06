@@ -9,13 +9,12 @@ def flatten_three_sixty(event: dict) -> list[dict]:
     freeze_frame = event.get("freeze_frame", [])
 
     records = []
-    for i, player in enumerate(freeze_frame):
+    for player in freeze_frame:
         records.append({
             "event_uuid": event_uuid or "",
-            "freeze_index": i,
-            "teammate": player.get("teammate", False),
-            "actor": player.get("actor", False),
-            "keeper": player.get("keeper", False),
+            "teammate": bool(player.get("teammate", False)),
+            "actor": bool(player.get("actor", False)),
+            "keeper": bool(player.get("keeper", False)),
             "x": (player.get("location") or [0.0, 0.0])[0],
             "y": (player.get("location") or [0.0, 0.0])[1],
             "visible_area": json.dumps(visible_area)
@@ -37,7 +36,6 @@ def load_three_sixty_to_clickhouse(context):
     clickhouse.execute('''
     CREATE TABLE IF NOT EXISTS football_statsbomb.three_sixty (
         event_uuid String,
-        freeze_index UInt16,
         teammate UInt8,
         actor UInt8,
         keeper UInt8,
@@ -45,7 +43,7 @@ def load_three_sixty_to_clickhouse(context):
         y Float32,
         visible_area String
     ) ENGINE = MergeTree()
-    ORDER BY (event_uuid, freeze_index)
+    ORDER BY (event_uuid)
     ''')
 
     for obj in objects:
@@ -53,21 +51,23 @@ def load_three_sixty_to_clickhouse(context):
             continue
         try:
             data = minio_client.get_object(MINIO_BUCKET, obj.object_name).read()
-            raw_json = json.loads(data)
+            try:
+                raw_json = json.loads(data)
+            except json.JSONDecodeError as e:
+                context.log.warning(f"Fichier JSON invalide: {obj.object_name} → {e}")
+                continue
 
             records = []
             for event in raw_json:
                 records.extend(flatten_three_sixty(event))
 
             df = pd.DataFrame(records)
-            df = df.astype({
-                "freeze_index": "int",
-                "teammate": "int",
-                "actor": "int",
-                "keeper": "int",
-                "x": "float32",
-                "y": "float32"
-            })
+
+            df["teammate"] = df["teammate"].astype("uint8")
+            df["actor"] = df["actor"].astype("uint8")
+            df["keeper"] = df["keeper"].astype("uint8")
+            df["x"] = df["x"].astype("float32")
+            df["y"] = df["y"].astype("float32")
 
             clickhouse.insert_dataframe("INSERT INTO football_statsbomb.three_sixty VALUES", df)
             inserted_rows += len(df)
