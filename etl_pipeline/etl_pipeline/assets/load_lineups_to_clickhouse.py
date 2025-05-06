@@ -38,6 +38,9 @@ def flatten_lineup(lineup: dict) -> list[dict]:
 
 @asset(required_resource_keys={"minio_client", "clickhouse_client"})
 def load_lineups_to_clickhouse(context):
+    """
+    Charge les fichiers lineups/*.json depuis MinIO et les insère dans ClickHouse.
+    """
     minio_client = context.resources.minio_client
     clickhouse = context.resources.clickhouse_client
 
