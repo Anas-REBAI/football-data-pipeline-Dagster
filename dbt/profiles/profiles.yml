@@ -1,0 +1,12 @@
+football_statsbomb:
+  target: dev
+  outputs:
+    dev:
+      type: clickhouse
+      host: clickhouse
+      port: 9000
+      user: admin
+      password: admin
+      database: football_statsbomb
+      schema: football_statsbomb
+      secure: false

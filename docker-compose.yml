@@ -53,6 +53,26 @@ services:
         /entrypoint.sh
     networks:
       - dagnet
+  
+  # DBT service
+  dbt:
+    image: ghcr.io/dbt-labs/dbt-core:1.5.0
+    container_name: dbt
+    volumes:
+      - ./dbt:/usr/app/dbt  # Mount full dbt project
+    working_dir: /usr/app/dbt
+    environment:
+      DBT_PROFILES_DIR: /usr/app/dbt/profiles
+    networks:
+      - dagnet
+    tty: true
+    stdin_open: true
+    entrypoint: /bin/sh
+    command: >
+      -c "
+        pip install dbt-clickhouse==1.5.1 && \
+        tail -f /dev/null
+      "
 
   # Orchestration service (Dagster)
   dagster:
@@ -64,6 +84,7 @@ services:
       - "3000:3000"
     volumes:
       - ./etl_pipeline:/app
+      - ./dbt:/app/dbt  # Mount full dbt project
     networks:
       - dagnet
 
