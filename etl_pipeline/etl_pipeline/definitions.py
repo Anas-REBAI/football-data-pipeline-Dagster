@@ -1,34 +1,35 @@
-from dagster import Definitions, define_asset_job, ScheduleDefinition, load_assets_from_modules
+from dagster import Definitions, load_assets_from_modules, AssetExecutionContext
+from pathlib import Path
+import os
+from dagster_dbt import DbtCliResource, dbt_assets
 from etl_pipeline import assets
 from etl_pipeline.config.ressources.minio_resource import minio_resource
 from etl_pipeline.config.ressources.clickhouse_resource import clickhouse_resource
+from etl_pipeline.config.ressources.dbt_resource import dbt_resource
 from etl_pipeline.config.settings import (
     MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET,
-    CLICKHOUSE_HOST, CLICKHOUSE_PORT, CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB
+    CLICKHOUSE_HOST, CLICKHOUSE_PORT, CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB,
+    DBT_PROJECT_DIR, DBT_PROFILES_DIR
 )
+from etl_pipeline.utils.sensor_scheduler import daily_schedule, my_file_sensor, pipeline_status_alert
+
+# Assets DBT
+@dbt_assets(manifest=Path(DBT_PROJECT_DIR) / "target/manifest.json")
+def dbt_models(context: AssetExecutionContext, dbt: DbtCliResource):
+    try:
+        # Exécutez d'abord un test simple
+        context.log.info("Starting DBT build...")
+        # Si réussi, lancez le build complet
+        yield from dbt.cli(["run"], context=context).stream()
+        
+    except Exception as e:
+        context.log.error(f"DBT execution failed: {str(e)}")
+        # Log des fichiers disponibles
+        context.log.error(f"Files in project dir: {os.listdir(DBT_PROJECT_DIR)}")
+        raise
 
 # Load all assets
 all_assets = load_assets_from_modules([assets])
-
-# Order explicit asset execution
-full_pipeline = define_asset_job(
-    name="full_data_pipeline",
-    selection=[
-        "transfer_statsbomb_to_minio",
-        "load_events_to_clickhouse",
-        "load_lineups_to_clickhouse",
-        "load_three_sixty_to_clickhouse",
-        "load_competitions_to_clickhouse",
-        "load_matches_to_clickhouse"
-    ]
-)
-
-# Optionally, schedule the job
-daily_schedule = ScheduleDefinition(
-    job=full_pipeline,
-    cron_schedule="0 2 * * *",  # Every day at 2AM
-    name="daily_data_pipeline_schedule"
-)
 
 resources = {
     "minio_client": minio_resource.configured({
@@ -43,12 +44,16 @@ resources = {
         "user": CLICKHOUSE_USER,
         "password": CLICKHOUSE_PASSWORD,
         "database": CLICKHOUSE_DB
+    }),
+    "dbt": dbt_resource.configured({
+        "project_dir": DBT_PROJECT_DIR,
+        "profiles_dir": DBT_PROFILES_DIR
     })
 }
 
 defs = Definitions(
-    assets=all_assets,
+    assets=[*all_assets, dbt_models],
     resources=resources,
-    jobs=[full_pipeline],
-    schedules=[daily_schedule]
+    schedules=[daily_schedule],
+    sensors=[my_file_sensor, pipeline_status_alert]
 )

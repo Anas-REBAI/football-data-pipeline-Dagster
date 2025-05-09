@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: football_statsbomb
+    schema: football_statsbomb 
+    tables:
+      - name: competitions
+      - name: events
+      - name: lineups
+      - name: matches
+      - name: three_sixty

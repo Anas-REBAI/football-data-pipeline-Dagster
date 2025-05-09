@@ -5,3 +5,5 @@ requests
 python-dotenv
 pandas
 clickhouse-driver
+dagster-dbt
+dbt-clickhouse

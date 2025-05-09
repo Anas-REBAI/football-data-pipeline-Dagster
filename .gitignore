@@ -27,6 +27,9 @@ storage/
 schedules/
 dagster.yaml
 
+# DBT
+dbt/profiles/.user.yml
+
 # Pytest / Mypy / coverage
 .mypy_cache/
 .pytest_cache/
