@@ -1,15 +1,14 @@
 {{ config(materialized='view') }}
 
-with possessions as (
-    select
-        match_id,
+WITH possessions AS (
+    SELECT
         possession,
-        possession_team_id as team_id,
-        possession_team_name as team_name,
-        sum(duration) as possession_duration_seconds,
-        count(*) as number_of_events
-    from {{ ref('stg_events') }}
-    group by match_id, possession, possession_team_id, possession_team_name
+        possession_team_id AS team_id,
+        possession_team_name AS team_name,
+        SUM(duration) AS possession_duration_seconds,
+        COUNT(*) AS number_of_events
+    FROM {{ ref('stg_events') }}
+    GROUP BY possession, possession_team_id, possession_team_name
 )
 
-select * from possessions
+SELECT * FROM possessions

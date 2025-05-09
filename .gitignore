@@ -28,7 +28,10 @@ schedules/
 dagster.yaml
 
 # DBT
+dbt/
 dbt/profiles/.user.yml
+dbt/dbt_packages/
+dbt/target/
 
 # Pytest / Mypy / coverage
 .mypy_cache/
